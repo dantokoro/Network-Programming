@@ -13,7 +13,7 @@
 
 #define BUFSIZE 1024
 
-double n = 80460899, e = 37, d, p, q, fi;
+long double n, e, d, p, q, fi;
 int login=0;
 char name[BUFSIZE];
 
@@ -81,7 +81,7 @@ void send_recv(int i, int sockfd)
 		}
 	    mess[strlen(mess) - 1] = '\0';
 	    //printf("User: %s; Mess: %s\n",name, mess );
-	    strcpy(cryp_mess, crypPlainText(mess, e, n));
+	    strcpy(cryp_mess, crypPlainText(mess, e, n, 0));
 	    sprintf(text_send,"%s-%s", name, cryp_mess);
 		send(sockfd, text_send, strlen(text_send), 0);
 	}else {
@@ -92,7 +92,7 @@ void send_recv(int i, int sockfd)
     	sender_name = strtok(recv_buf, delim);
     	//printf("%s\n", sender_name);
     	recv_message = strtok(NULL, delim);
-    	strcpy(cryp_recv_mess, crypPlainText(recv_message, d, n));
+    	strcpy(cryp_recv_mess, crypPlainText(recv_message, d, n, 1));
 		printf("From %s: %s\n" , sender_name, cryp_recv_mess);
 		fflush(stdout);
 	}
@@ -122,6 +122,16 @@ void connect_request(int *sockfd, struct sockaddr_in *server_addr)
 	// bzero(my_port, sizeof(my_port));
 
 }
+void createKey(long double *n, long double *e, long double* p, long double* q, long double *d, long double *fi, int sockfd){
+	char publicKey[100];
+	get_n(n, e, p, q);
+	get_e(e);
+	getInput(*n, *e, p, q, fi, d);
+	sprintf(publicKey,"%Lf-%Lf", *n, *e);
+	printf("%s\n", publicKey);
+	send(sockfd, publicKey, strlen(publicKey), 0);
+	bzero(publicKey, sizeof(publicKey));
+}
 
 int main()
 {
@@ -130,7 +140,6 @@ int main()
 	fd_set master;
 	fd_set read_fds;
 
-  getInput(n, e, &p, &q, &fi, &d);
 
 	connect_request(&sockfd, &server_addr);
 	FD_ZERO(&master);
@@ -141,6 +150,8 @@ int main()
 	
 	while(login==0)
 		LogIn(sockfd);
+	createKey(&n, &e, &p, &q, &d, &fi, sockfd);
+	printf("e=%Lf n=%Lf d=%Lf\n",e, n, d );
 	while(1){
 		read_fds = master;
 		if(select(fdmax+1, &read_fds, NULL, NULL, NULL) == -1){

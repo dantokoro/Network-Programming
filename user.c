@@ -17,11 +17,35 @@ void push(Node** head, char username[], char password[], int status)
     (*head)    = new_node; 
 } 
 
+//search a node by username
+Node* SearchName(Node *head, char name[]){			
+	Node *cur;
+	cur = head;
+	while(cur!=NULL){
+		if(strcmp(cur->username, name) == 0) return cur;
+		cur = cur->next;
+	}
+	return cur;		//Neu k tim thay -> return NULL
+}
+
+void savePuclicKey(Node* cur, int i, char n[], char e[]){
+	// Node *cur;
+	
+	// cur = SearchName((*head), name);			// cur = user dang nhap
+	if(cur == NULL){	
+		printf("Khong tim thay user vua dang nhap :|\n");
+	}else{
+		cur->i=i;
+		strcpy(cur->n, n);
+		strcpy(cur->e, e);
+		printf("%s\t%15s%12d%20s%20s\n", cur->username, cur->password, cur->i, cur->n, cur->e);
+	}
+}
 // Print the linked list
 void print_list(Node *head){
-	printf("\nName\t\tPassword\tStatus\tLogin\n");
+	printf("\nName\t\tPassword\ti\t\tn\t\te\n");
 	while(head != NULL){
-		printf("%s\t%15s%12d%7d\n", head->username, head->password, head->status, head->login);
+		printf("%s\t%15s%12d%20s%20s\n", head->username, head->password, head->i, head->n, head->e);
 		head = head->next;
 	}
 	printf("\n");
@@ -71,16 +95,6 @@ void ghifile(char filename[], Node *head){
 	fclose(fptr);
 }
 
-//search a node by username
-Node* SearchName(Node *head, char name[]){			
-	Node *cur;
-	cur = head;
-	while(cur!=NULL){
-		if(strcmp(cur->username, name) == 0) return cur;
-		cur = cur->next;
-	}
-	return cur;		//Neu k tim thay -> return NULL
-}
 
 //Menu's 1st func
 void Register(Node **head, char filename[]){

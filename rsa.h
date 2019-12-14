@@ -4,23 +4,28 @@
 #include <math.h>
 #include <ctype.h>
 
-#define MAXNUMBER 10000000000
-#define MAXLEIGHT 10000
-#define MAXBINARY 100
+#define MAXNUMBER 100000000000
+#define MAXLEIGHT 10
+#define MAXBINARY 500
 
 #define NISTOOSMALLERRORMES "N is too small !!!\n\n"
 
 int check;
 int binaryNum[MAXBINARY];
 
-int isPrimeNumber(double num);
-void analysisToTwoPrime(double num, double *num1, double *num2);
-void euclid(double n, double e, double *d);
-double gcd(double a, double b);
-int decToBinary(double n);
-char* decToAlpha(double num);
-double stringToDb(char *input);
+void get_n(long double *n, long double *e, long double* p, long double* q);
+void get_e(long double *e);
+void setCheckPoint(int input);
+int getCharIndex(char input);
+int isPrimeNumber(long double num);
+void analysisToTwoPrime(long double num, long double *num1, long double *num2);
+void euclid(long double n, long double e, long double *d);
+long double gcd(long double a, long double b);
+int decToBinary(long double n);
+char* decToAlpha(long double num);
+long double stringToDb(char *input);
 void printTokList(char *tokList);
-void getInput(double n, double e, double* p, double* q, double* fi, double* d);
-char* crypPlainText(char *pt, double y, double n);
-char* crypto(char *monoPt, double y, double n);
+void getInput(long double n, long double e, long double* p, long double* q, long double* fi, long double* d);
+// way : 0 - cryp || 1 - decryp
+char* crypPlainText(char *pt, long double y, long double n, int way);
+char* crypto(char *monoPt, long double y, long double n);

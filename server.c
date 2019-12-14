@@ -12,6 +12,34 @@
 #define PORT 4950
 #define BUFSIZE 1024
 
+void getKey(Node *cur, int i){
+	int nbytes_recvd, j;
+	char recv_buf[BUFSIZE];
+	const char delim[2]="-";
+	char *n;
+	char *e;
+	if ((nbytes_recvd = recv(i, recv_buf, BUFSIZE, 0)) <= 0) {
+		if (nbytes_recvd == 0) {
+			printf("socket %d hung up\n", i);
+		}else {
+			perror("recv");
+		}
+		close(i);
+		//FD_CLR(i, master);
+	}else {
+		recv_buf[nbytes_recvd] = '\0';
+		printf("Receive from user %d : %s\n", i, recv_buf);
+		n = strtok(recv_buf, delim);
+    	e = strtok(NULL, delim);
+		printf("%s %s\n",n, e );
+		cur->i=i;
+		strcpy(cur->n, n);
+		strcpy(cur->e, e);
+		printf("%s\t%15s%12d%20s%20s\n", cur->username, cur->password, cur->i, cur->n, cur->e);
+		bzero(recv_buf, sizeof(recv_buf));
+	}
+}
+
 int HandlingLogIn(int newSocket, Node **head, char filename[]){
 	char buffer[1024], temp[100];
 	char name[1024], password[1024];
@@ -50,6 +78,7 @@ int HandlingLogIn(int newSocket, Node **head, char filename[]){
 					cur->login=1;
 					strcpy(buffer, "Password is correct");
 					send(newSocket, buffer, strlen(buffer), 0);
+					getKey(cur, newSocket);
 					bzero(buffer, sizeof(buffer));
 				} 
 			}while(strcmp(cur->password, password)!=0 && wrong_pass_count<=3);
@@ -108,6 +137,7 @@ void send_recv(int i, fd_set *master, int sockfd, int fdmax)
 		bzero(recv_buf, sizeof(recv_buf));
 	}
 }
+
 
 void connection_accept(fd_set *master, int *fdmax, int sockfd, struct sockaddr_in *client_addr)
 {
@@ -195,11 +225,12 @@ int main()
 							Node *head = NULL;
 							char filename[30]="account.txt";
 							docfile(filename, &head);
-							//print_list(head);
 							printf("------------LOGIN-------------\n");
 							login[i] = HandlingLogIn(i, &head, filename);
+							print_list(head);
 							deleteList(&head);
-						}	
+						}
+						//getKey(i, &master, sockfd);	
 					}else
 						send_recv(i, &master, sockfd, fdmax);
 				}
