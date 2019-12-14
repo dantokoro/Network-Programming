@@ -132,7 +132,33 @@ void createKey(long double *n, long double *e, long double* p, long double* q, l
 	send(sockfd, publicKey, strlen(publicKey), 0);
 	bzero(publicKey, sizeof(publicKey));
 }
+void get_active_user_list(int sockfd){
+	int nbyte_recvd, count=1;
+	char friend_name[100];
+	char recv_buf[BUFSIZE];
+	printf("-------LIST OF ACTIVE USER---------\n");
+	do{
+		bzero(recv_buf, sizeof(recv_buf));
+		nbyte_recvd = recv(sockfd, recv_buf, BUFSIZE, 0);
+		recv_buf[nbyte_recvd] = '\0';
+		send(sockfd, "OK", strlen("OK"), 0);
+		if(strcmp(recv_buf, "|done|")!=0){
+			printf("\t%s\n", recv_buf );
+			count++;
+		}
+	}while(strcmp(recv_buf, "|done|")!=0);
+	printf("------------------------------------\n");
+	
+	// printf("Who do you want to chat with?\n");
+	// scanf("%s%*c", friend_name);
+	// send(sockfd, friend_name, strlen(friend_name), 0);
+	// ////
+	// nbyte_recvd = recv(sockfd, recv_buf, BUFSIZE, 0);
+	// 	recv_buf[nbyte_recvd] = '\0';
+	// 	printf("%s\n",recv_buf );
 
+
+}
 int main()
 {
 	int sockfd, fdmax, i;
@@ -152,6 +178,7 @@ int main()
 		LogIn(sockfd);
 	createKey(&n, &e, &p, &q, &d, &fi, sockfd);
 	printf("e=%Lf n=%Lf d=%Lf\n",e, n, d );
+	get_active_user_list(sockfd);
 	while(1){
 		read_fds = master;
 		if(select(fdmax+1, &read_fds, NULL, NULL, NULL) == -1){

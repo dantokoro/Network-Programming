@@ -12,6 +12,7 @@ void push(Node** head, char username[], char password[], int status)
     strcpy(new_node->username, username);
     strcpy(new_node->password, password);
     new_node->status  = status; 
+    new_node->login=0;
 
     new_node->next = (*head); 
     (*head)    = new_node; 
@@ -38,14 +39,13 @@ void savePuclicKey(Node* cur, int i, char n[], char e[]){
 		cur->i=i;
 		strcpy(cur->n, n);
 		strcpy(cur->e, e);
-		printf("%s\t%15s%12d%20s%20s\n", cur->username, cur->password, cur->i, cur->n, cur->e);
 	}
 }
 // Print the linked list
 void print_list(Node *head){
 	printf("\nName\t\tPassword\ti\t\tn\t\te\n");
 	while(head != NULL){
-		printf("%s\t%15s%12d%20s%20s\n", head->username, head->password, head->i, head->n, head->e);
+		printf("%s\t%12s%12d%20s%20s\n", head->username, head->password, head->i, head->n, head->e);
 		head = head->next;
 	}
 	printf("\n");

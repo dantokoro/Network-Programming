@@ -176,9 +176,7 @@ void getInput(long double n, long double e, long double* p, long double* q, long
   if(*p != 1) {
     // Get fi(n)
     *fi = (*p - 1) * (*q -1);
-    printf("1111\n");
     euclid(*fi, e, d);
-    printf("22222\n");
     if(*d == 1) {
       printf("[!]Can't find d\n");
     }

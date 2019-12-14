@@ -35,7 +35,6 @@ void getKey(Node *cur, int i){
 		cur->i=i;
 		strcpy(cur->n, n);
 		strcpy(cur->e, e);
-		printf("%s\t%15s%12d%20s%20s\n", cur->username, cur->password, cur->i, cur->n, cur->e);
 		bzero(recv_buf, sizeof(recv_buf));
 	}
 }
@@ -138,6 +137,34 @@ void send_recv(int i, fd_set *master, int sockfd, int fdmax)
 	}
 }
 
+void active_user_list(Node *head, int i){
+	Node *cur;
+	int ret, j;
+	char confirm[100], chosen_user[30];
+	char user_port[10][30];
+	cur = head;
+	while(cur!=NULL){
+		if((cur->login) == 1){
+			printf("------%s\n",cur->username );
+			send(i, cur->username, strlen(cur->username), 0);
+			strcpy(user_port[cur->i],cur->username);			//vd: user_port[5]="dang", user_port[4]="tu"
+			ret = recv(i, confirm, 1024, 0);
+			confirm[ret]='\0';
+			//printf("%s\n",confirm );
+		}
+		cur = cur->next;
+	}
+	send(i, "|done|", strlen("|done|"), 0);
+	ret = recv(i, confirm, 1024, 0);
+	confirm[ret]='\0';
+	// ret = recv(i, chosen_user, 1024, 0);
+	// chosen_user[ret]='\0';
+	// printf("Chosen: %s\n", chosen_user);
+	// for(j=0;j<10;j++){			//Tim so port cua chosen user
+	// 	if(strcmp(user_port[j], chosen_user)==0) break;
+	// }
+	// send(j, "May duoc chon", strlen("May duoc chon"), 0);
+}
 
 void connection_accept(fd_set *master, int *fdmax, int sockfd, struct sockaddr_in *client_addr)
 {
@@ -195,6 +222,9 @@ int main()
 {
 	char name[30];
 	int ret, login[20]={};
+	Node *head = NULL;
+	char filename[30]="account.txt";
+	docfile(filename, &head);
 
 	fd_set master;
 	fd_set read_fds;
@@ -222,15 +252,13 @@ int main()
 				else{
 					if(login[i]==0){
 						while(login[i]==0){
-							Node *head = NULL;
-							char filename[30]="account.txt";
-							docfile(filename, &head);
 							printf("------------LOGIN-------------\n");
 							login[i] = HandlingLogIn(i, &head, filename);
 							print_list(head);
-							deleteList(&head);
+							//deleteList(&head);
 						}
-						//getKey(i, &master, sockfd);	
+						//getKey(i, &master, sockfd);
+						active_user_list(head, i);	
 					}else
 						send_recv(i, &master, sockfd, fdmax);
 				}
