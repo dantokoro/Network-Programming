@@ -13,7 +13,7 @@
 
 #define BUFSIZE 1024
 
-double n, e, d, p, q, fi, n_friend_double=101485451, e_friend_double=37;
+double n, e, d, p, q, fi, n_friend_double, e_friend_double;
 int login=0, chatting=0;
 char name[BUFSIZE];
 
