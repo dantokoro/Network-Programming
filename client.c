@@ -13,7 +13,7 @@
 
 #define BUFSIZE 1024
 
-long double n, e, d, p, q, fi;
+double n, e, d, p, q, fi, n_friend_double=101485451, e_friend_double=37;
 int login=0, chatting=0;
 char name[BUFSIZE];
 
@@ -81,7 +81,7 @@ void send_recv(int i, int sockfd)
 		}
 	    mess[strlen(mess) - 1] = '\0';
 	    //printf("User: %s; Mess: %s\n",name, mess );
-	    strcpy(cryp_mess, crypPlainText(mess, e, n, 0));
+	    strcpy(cryp_mess, crypPlainText(mess, e_friend_double, n_friend_double, 0));
 	    sprintf(text_send,"%s-%s", name, cryp_mess);
 		send(sockfd, text_send, strlen(text_send), 0);
 	}else {
@@ -122,12 +122,12 @@ void connect_request(int *sockfd, struct sockaddr_in *server_addr)
 	// bzero(my_port, sizeof(my_port));
 
 }
-void createKey(long double *n, long double *e, long double* p, long double* q, long double *d, long double *fi, int sockfd){
+void createKey(double *n, double *e, double* p, double* q, double *d, double *fi, int sockfd){
 	char publicKey[100];
 	get_n(n, e, p, q);
 	get_e(e);
 	getInput(*n, *e, p, q, fi, d);
-	sprintf(publicKey,"%Lf-%Lf", *n, *e);
+	sprintf(publicKey,"%f-%f", *n, *e);
 	printf("%s\n", publicKey);
 	send(sockfd, publicKey, strlen(publicKey), 0);
 	bzero(publicKey, sizeof(publicKey));
@@ -161,13 +161,10 @@ void get_active_user_list(int sockfd){
 
 void connect_to_friend(int i, int sockfd){
 	char mess[BUFSIZE];
-  	char cryp_recv_mess[BUFSIZE], text_send[BUFSIZE];
-  	char cryp_mess[BUFSIZE];
 	char recv_buf[BUFSIZE];
 	int nbyte_recvd;
 	const char delim[2]="-";
-	char* sender_name;
-	char* recv_message;
+	char *n_friend, *e_friend, *friend_name, *ptr;
 
 	if (i == 0){
 		fgets(mess, BUFSIZE, stdin);
@@ -178,11 +175,21 @@ void connect_to_friend(int i, int sockfd){
 		send(sockfd, mess, strlen(mess), 0);
 		nbyte_recvd = recv(sockfd, recv_buf, BUFSIZE, 0);
 		recv_buf[nbyte_recvd] = '\0';
-		printf("%s\n",recv_buf );
+		n_friend = strtok(recv_buf, delim);
+	    e_friend = strtok(NULL, delim);
+	    friend_name = strtok(NULL, delim);
+	    n_friend_double=strtod(n_friend, &ptr);
+	    e_friend_double=strtod(e_friend, &ptr);
+	    printf("You are inbox with %s: n=%f; e=%f\n",friend_name, n_friend_double, e_friend_double);
 	}else {
 		nbyte_recvd = recv(sockfd, recv_buf, BUFSIZE, 0);
 		recv_buf[nbyte_recvd] = '\0';
-		printf("%s\n",recv_buf );
+		n_friend = strtok(recv_buf, delim);
+	    e_friend = strtok(NULL, delim);
+	    friend_name = strtok(NULL, delim);
+	    n_friend_double=strtod(n_friend, &ptr);
+	    e_friend_double=strtod(e_friend, &ptr);
+	    printf("You are inbox with %s: n=%f; e=%f\n",friend_name, n_friend_double, e_friend_double);
 		fflush(stdout);
 	}
 }
@@ -205,7 +212,7 @@ int main()
 	while(login==0)
 		LogIn(sockfd);
 	createKey(&n, &e, &p, &q, &d, &fi, sockfd);
-	printf("e=%Lf n=%Lf d=%Lf\n",e, n, d );
+	printf("e=%f n=%f d=%f\n",e, n, d );
 	get_active_user_list(sockfd);
 	while(1){
 		read_fds = master;

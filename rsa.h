@@ -13,19 +13,19 @@
 int check;
 int binaryNum[MAXBINARY];
 
-void get_n(long double *n, long double *e, long double* p, long double* q);
-void get_e(long double *e);
+void get_n(double *n, double *e, double* p, double* q);
+void get_e(double *e);
 void setCheckPoint(int input);
 int getCharIndex(char input);
-int isPrimeNumber(long double num);
-void analysisToTwoPrime(long double num, long double *num1, long double *num2);
-void euclid(long double n, long double e, long double *d);
-long double gcd(long double a, long double b);
-int decToBinary(long double n);
-char* decToAlpha(long double num);
-long double stringToDb(char *input);
+int isPrimeNumber(double num);
+void analysisToTwoPrime(double num, double *num1, double *num2);
+void euclid(double n, double e, double *d);
+double gcd(double a, double b);
+int decToBinary(double n);
+char* decToAlpha(double num);
+double stringToDb(char *input);
 void printTokList(char *tokList);
-void getInput(long double n, long double e, long double* p, long double* q, long double* fi, long double* d);
+void getInput(double n, double e, double* p, double* q, double* fi, double* d);
 // way : 0 - cryp || 1 - decryp
-char* crypPlainText(char *pt, long double y, long double n, int way);
-char* crypto(char *monoPt, long double y, long double n);
+char* crypPlainText(char *pt, double y, double n, int way);
+char* crypto(char *monoPt, double y, double n);
