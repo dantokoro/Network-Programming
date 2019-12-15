@@ -14,7 +14,7 @@
 #define BUFSIZE 1024
 
 long double n, e, d, p, q, fi;
-int login=0;
+int login=0, chatting=0;
 char name[BUFSIZE];
 
 //function log in with a username and password
@@ -148,6 +148,7 @@ void get_active_user_list(int sockfd){
 		}
 	}while(strcmp(recv_buf, "|done|")!=0);
 	printf("------------------------------------\n");
+	printf("Connecting to.....\n");
 	
 	// printf("Who do you want to chat with?\n");
 	// scanf("%s%*c", friend_name);
@@ -156,9 +157,36 @@ void get_active_user_list(int sockfd){
 	// nbyte_recvd = recv(sockfd, recv_buf, BUFSIZE, 0);
 	// 	recv_buf[nbyte_recvd] = '\0';
 	// 	printf("%s\n",recv_buf );
-
-
 }
+
+void connect_to_friend(int i, int sockfd){
+	char mess[BUFSIZE];
+  	char cryp_recv_mess[BUFSIZE], text_send[BUFSIZE];
+  	char cryp_mess[BUFSIZE];
+	char recv_buf[BUFSIZE];
+	int nbyte_recvd;
+	const char delim[2]="-";
+	char* sender_name;
+	char* recv_message;
+
+	if (i == 0){
+		fgets(mess, BUFSIZE, stdin);
+		if (strcmp(mess , "\n") == 0) {
+			exit(0);
+		}
+	    mess[strlen(mess) - 1] = '\0';
+		send(sockfd, mess, strlen(mess), 0);
+		nbyte_recvd = recv(sockfd, recv_buf, BUFSIZE, 0);
+		recv_buf[nbyte_recvd] = '\0';
+		printf("%s\n",recv_buf );
+	}else {
+		nbyte_recvd = recv(sockfd, recv_buf, BUFSIZE, 0);
+		recv_buf[nbyte_recvd] = '\0';
+		printf("%s\n",recv_buf );
+		fflush(stdout);
+	}
+}
+
 int main()
 {
 	int sockfd, fdmax, i;
@@ -187,8 +215,13 @@ int main()
 		}
 
 		for(i=0; i <= fdmax; i++ )
-			if(FD_ISSET(i, &read_fds))
+			if(FD_ISSET(i, &read_fds)){
+				if(chatting==0){
+					connect_to_friend(i, sockfd);
+					chatting=1;
+				}
 				send_recv(i, sockfd);
+			}
 	}
 	printf("client-quited\n");
 	close(sockfd);

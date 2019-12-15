@@ -11,6 +11,8 @@
 #include "user.h"
 #define PORT 4950
 #define BUFSIZE 1024
+char user_port[10][30]; //vd: user_port[5]="dang", user_port[4]="tu"
+char chatting[20]={};
 
 void getKey(Node *cur, int i){
 	int nbytes_recvd, j;
@@ -137,17 +139,59 @@ void send_recv(int i, fd_set *master, int sockfd, int fdmax)
 	}
 }
 
+void handle_connect_to_friend(int i, fd_set *master, int sockfd, int fdmax, Node* head)	//Receive user2's name and create box chat for user1 and user2
+{
+	int nbytes_recvd, j;
+	char recv_buf[BUFSIZE], buf[BUFSIZE];
+	char send_mess[BUFSIZE];
+	Node *cur1, *cur2;
+
+	if ((nbytes_recvd = recv(i, recv_buf, BUFSIZE, 0)) <= 0) {	//i = user A
+		if (nbytes_recvd == 0) {
+			printf("socket %d hung up\n", i);
+		}else {
+			perror("recv");
+		}
+		close(i);
+		FD_CLR(i, master);
+	}else {
+		recv_buf[nbytes_recvd] = '\0';
+		printf("Receive from user %d : %s\n", i, recv_buf);
+		cur1=SearchName(head, user_port[i]);
+		if(cur1==NULL){
+			printf("Khong tim thay thong tin user1\n");
+			exit(0);
+		}
+		cur2=SearchName(head, recv_buf);		//send notification to user2
+		if(cur2==NULL) printf("Khong tim thay thong tin user2\n");
+		else{
+			j=cur2->i;			//j=chosen user's port
+			sprintf(send_mess, "You are inbox with %s -- n:%s -- e:%s", cur1->username, cur1->n, cur1->e);
+			if (send(j, send_mess, strlen(send_mess), 0) == -1) {
+				perror("send");
+			}
+		}
+		sprintf(send_mess, "You are inbox with %s -- n:%s -- e:%s", cur2->username, cur2->n, cur2->e);	//send notofication to user1
+		if (send(i, send_mess, strlen(send_mess), 0) == -1) {
+			perror("send");
+		}
+		chatting[i]=1;
+		chatting[j]=1;
+
+		bzero(recv_buf, sizeof(recv_buf));
+	}
+}
+
 void active_user_list(Node *head, int i){
 	Node *cur;
 	int ret, j;
 	char confirm[100], chosen_user[30];
-	char user_port[10][30];
 	cur = head;
 	while(cur!=NULL){
 		if((cur->login) == 1){
 			printf("------%s\n",cur->username );
 			send(i, cur->username, strlen(cur->username), 0);
-			strcpy(user_port[cur->i],cur->username);			//vd: user_port[5]="dang", user_port[4]="tu"
+			strcpy(user_port[cur->i],cur->username);			
 			ret = recv(i, confirm, 1024, 0);
 			confirm[ret]='\0';
 			//printf("%s\n",confirm );
@@ -258,9 +302,13 @@ int main()
 							//deleteList(&head);
 						}
 						//getKey(i, &master, sockfd);
-						active_user_list(head, i);	
-					}else
+						active_user_list(head, i);
+
+					}else{
+						if(chatting[i]==0)
+							handle_connect_to_friend(i, &master, sockfd, fdmax, head);
 						send_recv(i, &master, sockfd, fdmax);
+					}
 				}
 			}
 		}
