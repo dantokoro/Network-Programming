@@ -74,13 +74,13 @@ char ascci[] = {
 '9'
 };
 
-long double prime_n[]={
+double prime_n[]={
   9817, 9829, 9833, 9839, 9851,  9857 , 9859 , 9871 , 9883 , 9887, 9901 , 9907 , 9923 , 9929 , 9931 , 9941 , 9949 , 9967 , 9973 , 10007
 };
-long double prime_e[]={
+double prime_e[]={
   29, 31, 37, 41, 43, 47, 53, 59, 61
 };
-void get_n(long double *n, long double *e, long double* p, long double* q){
+void get_n(double *n, double *e, double* p, double* q){
   int i;
   int prime_n_len=sizeof(prime_n)/sizeof(prime_n[0]);
   time_t t;
@@ -94,7 +94,7 @@ void get_n(long double *n, long double *e, long double* p, long double* q){
   } 
   *n=(*p)*(*q);
 }
-void get_e(long double *e){
+void get_e(double *e){
   int i;
   int prime_e_len=sizeof(prime_e)/sizeof(prime_e[0]);
   time_t t;
@@ -117,7 +117,7 @@ int getCharIndex(char input) {
   }
 }
 
-int isPrimeNumber(long double num) {
+int isPrimeNumber(double num) {
   for(int i = 2; i <= sqrt(num); i++){
     if(fmodl(num, i) == 0){
       return 0;
@@ -127,7 +127,7 @@ int isPrimeNumber(long double num) {
   return 1;
 }
 
-void analysisToTwoPrime(long double num, long double *num1, long double *num2) {
+void analysisToTwoPrime(double num, double *num1, double *num2) {
   *num1 = 1;
   *num2 = num;
 
@@ -142,7 +142,7 @@ void analysisToTwoPrime(long double num, long double *num1, long double *num2) {
   //     }
   //   }
   // }
-  for(long double i = floor(sqrt(num)); i >= 2; i--) {
+  for(double i = floor(sqrt(num)); i >= 2; i--) {
     if(isPrimeNumber(i)) {
       if(fmodl(num, i) == 0) {
         if(isPrimeNumber(num / i)) {
@@ -156,9 +156,9 @@ void analysisToTwoPrime(long double num, long double *num1, long double *num2) {
 }
 
 // Get Private Key
-void euclid(long double n, long double e, long double *d) {
+void euclid(double n, double e, double *d) {
   *d = 1;
-  for(long double i = 0; i < MAXNUMBER; i++) {
+  for(double i = 0; i < MAXNUMBER; i++) {
     if(fmodl(i*e - 1, n) == 0) {
       *d = i;
       return;
@@ -166,12 +166,12 @@ void euclid(long double n, long double e, long double *d) {
   }
 }
 
-long double gcd(long double a, long double b) {
+double gcd(double a, double b) {
   if (b == 0) return a;
   return gcd(b, fmodl(a, b));
 }
 
-void getInput(long double n, long double e, long double* p, long double* q, long double* fi, long double* d) {
+void getInput(double n, double e, double* p, double* q, double* fi, double* d) {
  // analysisToTwoPrime(n, p, q);
   if(*p != 1) {
     // Get fi(n)
@@ -185,28 +185,28 @@ void getInput(long double n, long double e, long double* p, long double* q, long
 }
 
 // x ^ y mod n
-char* crypto(char *monoPt, long double y, long double n) {
-  long double x = stringToDb(monoPt);
-  if(check_point) printf("%s to %.1Lf\n", monoPt, x);
+char* crypto(char *monoPt, double y, double n) {
+  double x = stringToDb(monoPt);
+  if(check_point) printf("%s to %.1f\n", monoPt, x);
 
   if(x > n) {
-    printf("%.1Lf is too small !!!\n\n", n);
+    printf("%.1f is too small !!!\n\n", n);
     return NISTOOSMALLERRORMES;
   }
 
   // Decimal to binary
   int loops = decToBinary(y);
-  long double result = 1;
+  double result = 1;
   for(int i = 0; i < loops; i++) {
-    if(check_point) printf("Loops %d(%d) : %.1Lf^2 => ", i, binaryNum[i], result);
+    if(check_point) printf("Loops %d(%d) : %.1f^2 => ", i, binaryNum[i], result);
     result = fmodl((result * result), n);
     if(result > n / 2) result = n - result;
-    if(check_point) printf("%.1Lf", result);
+    if(check_point) printf("%.1f", result);
     if(binaryNum[i] == 1) {
-      if(check_point) printf(" || %.1Lf", result);
+      if(check_point) printf(" || %.1f", result);
       result = fmodl((result * x), n);
       if(result > n / 2) result = n - result;
-      if(check_point) printf(" * %.1Lf => %.1Lf", x, result);
+      if(check_point) printf(" * %.1f => %.1f", x, result);
     }
     if(check_point) printf("\n");
 
@@ -217,17 +217,17 @@ char* crypto(char *monoPt, long double y, long double n) {
   char* tmp = (char *)malloc(12 * sizeof(char));
 
   tmp = decToAlpha(result);
-  if(check_point) printf("Cryp result : %s - %.1Lf\n", tmp, result);
+  if(check_point) printf("Cryp result : %s - %.1f\n", tmp, result);
 
   return tmp;
 }
 
-int decToBinary(long double num) {
+int decToBinary(double num) {
   int tmpBinary[MAXBINARY];
 
   int n = 0, tmp;
 
-  if(check_point) printf("Dec : %.1Lf to Binary : ", num);
+  if(check_point) printf("Dec : %.1f to Binary : ", num);
 
   while(num > 0) {
     tmp = (int)fmodl(num, 2);
@@ -252,17 +252,17 @@ int decToBinary(long double num) {
   }
   return n;
 }
-char* decToAlpha(long double num) {
+char* decToAlpha(double num) {
   int tmpAlpha[MAXBINARY];
 
   if(num == 0) {
     return "a";
   }
 
-  if(check_point) printf("Dec to Alpha : %.1Lf\n", num);
+  if(check_point) printf("Dec to Alpha : %.1f\n", num);
 
   int n = 0;
-  long double bina;
+  double bina;
   while(num > 0) {
     bina = fmodl(num, sizeof_ascii + 1);
     tmpAlpha[n] = (int)bina;
@@ -285,18 +285,18 @@ char* decToAlpha(long double num) {
   return tmp;
 }
 
-long double stringToDb(char *input) {
-  long double result = 0;
+double stringToDb(char *input) {
+  double result = 0;
   for(int i = 0; i < strlen(input); i++) {
     result += (getCharIndex(tolower(input[i]))) * pow(sizeof_ascii + 1, strlen(input) - i - 1);
     if(check_point) printf("i : %d - char : %c - %d\n", i, input[i], getCharIndex(input[i]));
   }
-  if(check_point) printf("Result : %.1Lf\n", result);
+  if(check_point) printf("Result : %.1f\n", result);
 
   return result;
 }
 
-char* crypPlainText(char *pt, long double y, long double n, int way) {
+char* crypPlainText(char *pt, double y, double n, int way) {
   const char delim[] = "|";
   char *tmp = (char *)malloc(4 * sizeof(char));
   char *tmp2, *tmpPtList;

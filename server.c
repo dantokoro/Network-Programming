@@ -166,12 +166,12 @@ void handle_connect_to_friend(int i, fd_set *master, int sockfd, int fdmax, Node
 		if(cur2==NULL) printf("Khong tim thay thong tin user2\n");
 		else{
 			j=cur2->i;			//j=chosen user's port
-			sprintf(send_mess, "You are inbox with %s -- n:%s -- e:%s", cur1->username, cur1->n, cur1->e);
+			sprintf(send_mess, "%s-%s-%s", cur1->n, cur1->e, cur1->username);
 			if (send(j, send_mess, strlen(send_mess), 0) == -1) {
 				perror("send");
 			}
 		}
-		sprintf(send_mess, "You are inbox with %s -- n:%s -- e:%s", cur2->username, cur2->n, cur2->e);	//send notofication to user1
+		sprintf(send_mess, "%s-%s-%s", cur2->n, cur2->e, cur2->username);	//send notofication to user1
 		if (send(i, send_mess, strlen(send_mess), 0) == -1) {
 			perror("send");
 		}
