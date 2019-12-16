@@ -11,16 +11,16 @@
 #include "user.h"
 #define PORT 4950
 #define BUFSIZE 1024
-char user_port[20][30]; //vd: user_port[5]="dang", user_port[4]="tu"
-int chatting[20]={};   //vd: chatting[5]=4
+char user_port[20][30]; //ex: user_port[5]="dang", user_port[4]="tu"
+int chatting[20]={};   //ex: chatting[5]=4
 
-void set_chatting_default_value(){
+void set_chatting_default_value(){  //Set all chatting status = -1
     for (int i = 0; i < 20; i++){
       chatting[i] = -1;
     }
 }
 
-void getKey(Node *cur, int i){
+void getKey(Node *cur, int i){      // Get Pubic Key of user
     int nbytes_recvd, j;
     char recv_buf[BUFSIZE];
     const char delim[2]="-";
@@ -57,9 +57,9 @@ int HandlingLogIn(int newSocket, Node **head, char filename[]){
     name[ret]='\0';
     //printf("Username: %s\n", name);
     Node *cur;
-    cur = SearchName((*head), name);            // cur = user dang nhap
-    if(cur != NULL){                            //Neu user da ton tai
-        if(cur->status == 0){                   //Neu user is blocked
+    cur = SearchName((*head), name);            
+    if(cur != NULL){                            
+        if(cur->status == 0){                   
             printf("Account is blocked\n");
             strcpy(buffer, "Account is blocked");
             send(newSocket, buffer, strlen(buffer), 0);
@@ -72,15 +72,15 @@ int HandlingLogIn(int newSocket, Node **head, char filename[]){
                 ret = recv(newSocket, password, 1024, 0);
                 password[ret]='\0';
                 //printf("Password: %s\n", password);
-                if(strcmp(cur->password, password)!=0){ //Neu nhap sai
-                    wrong_pass_count++;                 //Tang so lan nhap sai
+                if(strcmp(cur->password, password)!=0){ 
+                    wrong_pass_count++;                 
                     strcpy(temp, "Password is incorrect");
                     sprintf(buffer, "%d-", wrong_pass_count);
                     strcat(buffer, temp);
                     printf("%s\n", buffer);
                     send(newSocket, buffer, strlen(buffer), 0);
                     bzero(buffer, sizeof(buffer));
-                }else{                                  //Neu nhap dung
+                }else{                                  
                     printf("Hello %s\n", cur->username);    
                     cur->login=1;
                     strcpy(buffer, "Password is correct");
@@ -105,7 +105,7 @@ int HandlingLogIn(int newSocket, Node **head, char filename[]){
     return cur->login;  
 }
 
-void send_recv(int i, fd_set *master, int sockfd, int fdmax)
+void send_recv(int i, fd_set *master, int sockfd, int fdmax)    //Handle send and receive message
 {
     int nbytes_recvd, j;
     char recv_buf[BUFSIZE], buf[BUFSIZE];
@@ -175,14 +175,13 @@ void handle_connect_to_friend(int i, fd_set *master, int sockfd, int fdmax, Node
     }
 }
 
-void active_user_list(Node *head, int i){
+void active_user_list(Node *head, int i){       // send active user list to user
     Node *cur;
     int ret, j;
     char confirm[100], chosen_user[30];
     cur = head;
     while(cur!=NULL){
         if((cur->login) == 1){
-            printf("------%s\n",cur->username );
             send(i, cur->username, strlen(cur->username), 0);
             strcpy(user_port[cur->i],cur->username);            
             ret = recv(i, confirm, 1024, 0);
@@ -194,13 +193,6 @@ void active_user_list(Node *head, int i){
     send(i, "|done|", strlen("|done|"), 0);
     ret = recv(i, confirm, 1024, 0);
     confirm[ret]='\0';
-    // ret = recv(i, chosen_user, 1024, 0);
-    // chosen_user[ret]='\0';
-    // printf("Chosen: %s\n", chosen_user);
-    // for(j=0;j<10;j++){           //Tim so port cua chosen user
-    //  if(strcmp(user_port[j], chosen_user)==0) break;
-    // }
-    // send(j, "May duoc chon", strlen("May duoc chon"), 0);
 }
 
 void connection_accept(fd_set *master, int *fdmax, int sockfd, struct sockaddr_in *client_addr)
@@ -295,12 +287,14 @@ int main()
                             print_list(head);
                             //deleteList(&head);
                         }
-                        //getKey(i, &master, sockfd);
                         active_user_list(head, i);
 
                     }else{
-                        if(chatting[i]==-1)
+                        printf("chatting: %d\n",chatting[i] );
+                        if(chatting[i]==-1){
+                            //active_user_list(head, i);
                             handle_connect_to_friend(i, &master, sockfd, fdmax, head);
+                        }
                         send_recv(i, &master, sockfd, fdmax);
                     }
                 }

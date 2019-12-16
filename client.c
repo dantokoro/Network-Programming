@@ -17,8 +17,7 @@ double n, e, d, p, q, fi, n_friend_double, e_friend_double;
 int login=0, chatting=0;
 char name[BUFSIZE];
 
-//function log in with a username and password
-void LogIn(int clientSocket){
+void LogIn(int clientSocket){		//function log in with a username and password
 	char password[1024], buffer[1024];
 	int wrong_pass_count=0;
 	char *temp_ptr;
@@ -34,14 +33,14 @@ void LogIn(int clientSocket){
 		printf("%s\n", buffer);
 	}else if(strcmp(buffer, "Account is active")==0){
 		do{
-			printf("Password: \n");					//nguoi dung nhap them password
+			printf("Password: \n");					
 			scanf("%s%*c", password);
 			send(clientSocket, password, strlen(password), 0);
 			bzero(password, sizeof(password));
 			bzero(buffer, sizeof(buffer));
 			if(recv(clientSocket, buffer, 1024, 0) < 0){
 				printf("[-]Error in receiving data.\n");
-			}else if((wrong_pass_count=strtoul(buffer, &temp_ptr, 10))!=0){			//neu ki tu dau la so -> wrong_pass_count
+			}else if((wrong_pass_count=strtoul(buffer, &temp_ptr, 10))!=0){			
 				printf("%s\n", buffer);
 				if(wrong_pass_count>3){
 					printf("Over 3 times incorrect password. Account is blocked\n");
@@ -63,7 +62,7 @@ void LogIn(int clientSocket){
 
 }
 
-void send_recv(int i, int sockfd)
+void send_recv(int i, int sockfd)		//send and recv mess
 {
   	char mess[BUFSIZE];
   	char cryp_recv_mess[BUFSIZE], text_send[BUFSIZE];
@@ -91,7 +90,8 @@ void send_recv(int i, int sockfd)
 		nbyte_recvd = recv(sockfd, recv_buf, BUFSIZE, 0);
 		recv_buf[nbyte_recvd] = '\0';
 		if (strcmp(recv_buf, "end_chat")==0){
-			printf("End chat.\n" );
+			printf("-------End chat-------\n" );
+			printf("Input name of user who you want to chat with :D\n");
 			chatting=0;
 		}else{
 			sender_name = strtok(recv_buf, delim);
@@ -127,13 +127,13 @@ void connect_request(int *sockfd, struct sockaddr_in *server_addr)
 	// bzero(my_port, sizeof(my_port));
 
 }
-void createKey(double *n, double *e, double* p, double* q, double *d, double *fi, int sockfd){
+void createKey(double *n, double *e, double* p, double* q, double *d, double *fi, int sockfd){	//Generate public key and calculate primary key
 	char publicKey[100];
 	get_n(n, e, p, q);
 	get_e(e);
 	getInput(*n, *e, p, q, fi, d);
 	sprintf(publicKey,"%f-%f", *n, *e);
-	printf("%s\n", publicKey);
+	//printf("%s\n", publicKey);
 	send(sockfd, publicKey, strlen(publicKey), 0);
 	bzero(publicKey, sizeof(publicKey));
 }
@@ -152,8 +152,9 @@ void get_active_user_list(int sockfd){
 			count++;
 		}
 	}while(strcmp(recv_buf, "|done|")!=0);
+	bzero(recv_buf, sizeof(recv_buf));
 	printf("------------------------------------\n");
-	printf("Input name of user who you want to chat with\n");
+	printf("Input name of user who you want to chat with :D\n");
 	
 }
 
@@ -195,7 +196,7 @@ void connect_to_friend(int i, int sockfd){
 
 int main()
 {
-	int sockfd, fdmax, i;
+	int sockfd, fdmax, i, chat_again=0;
 	struct sockaddr_in server_addr;
 	fd_set master;
 	fd_set read_fds;
@@ -211,7 +212,7 @@ int main()
 	while(login==0)
 		LogIn(sockfd);
 	createKey(&n, &e, &p, &q, &d, &fi, sockfd);
-	printf("e=%f n=%f d=%f\n",e, n, d );
+	//printf("e=%f n=%f d=%f\n",e, n, d );
 	get_active_user_list(sockfd);
 	while(1){
 		read_fds = master;
@@ -223,8 +224,11 @@ int main()
 		for(i=0; i <= fdmax; i++ )
 			if(FD_ISSET(i, &read_fds)){
 				if(chatting==0){
+					// if(chat_again==1)
+					// 	get_active_user_list(sockfd);
 					connect_to_friend(i, sockfd);
 					chatting=1;
+					chat_again=1;
 				}
 				send_recv(i, sockfd);
 			}
