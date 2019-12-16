@@ -185,21 +185,24 @@ void handle_connect_to_friend(int i, fd_set *master, int sockfd, int fdmax, Node
                 exit(0);
             }
             cur2=SearchName(head, recv_buf);        //send notification to user2
-            if(cur2==NULL) printf("Khong tim thay thong tin user2\n");
-            else{
+            if(cur2==NULL){
+                printf("Khong tim thay thong tin user2\n");
+                send(i, "No_user_found", strlen("No_user_found"), 0);
+                handle_connect_to_friend(i, master, sockfd, fdmax, head);
+            }else{
                 j=cur2->i;          //j=chosen user's port
                 sprintf(send_mess, "%s-%s-%s", cur1->n, cur1->e, cur1->username);
                 if (send(j, send_mess, strlen(send_mess), 0) == -1) {
                     perror("send");
                 }
+                sprintf(send_mess, "%s-%s-%s", cur2->n, cur2->e, cur2->username);   //send notification to user1
+                if (send(i, send_mess, strlen(send_mess), 0) == -1) {
+                    perror("send");
+                }
+                chatting[i]=j;
+                chatting[j]=i;
+                bzero(recv_buf, sizeof(recv_buf));
             }
-            sprintf(send_mess, "%s-%s-%s", cur2->n, cur2->e, cur2->username);   //send notification to user1
-            if (send(i, send_mess, strlen(send_mess), 0) == -1) {
-                perror("send");
-            }
-            chatting[i]=j;
-            chatting[j]=i;
-            bzero(recv_buf, sizeof(recv_buf));
         }
     }
 }

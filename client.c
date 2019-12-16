@@ -183,13 +183,18 @@ void connect_to_friend(int i, int sockfd){
 		}else{
 			nbyte_recvd = recv(sockfd, recv_buf, BUFSIZE, 0);
 			recv_buf[nbyte_recvd] = '\0';
-
-			n_friend = strtok(recv_buf, delim);
-		    e_friend = strtok(NULL, delim);
-		    friend_name = strtok(NULL, delim);
-		    n_friend_double=strtod(n_friend, &ptr);
-		    e_friend_double=strtod(e_friend, &ptr);
-		    printf("You are inbox with %s :D (input 'end_chat' to end chat) \n",friend_name);
+			if(strcmp(recv_buf, "No_user_found")==0){
+				printf("User not exist. Input again.\n");
+				connect_to_friend(i,sockfd);
+			}else{
+				n_friend = strtok(recv_buf, delim);
+			    e_friend = strtok(NULL, delim);
+			    friend_name = strtok(NULL, delim);
+			    n_friend_double=strtod(n_friend, &ptr);
+			    e_friend_double=strtod(e_friend, &ptr);
+			    printf("You are inbox with %s :D (input 'end_chat' to end chat) \n",friend_name);
+			}
+			
 	    }
 	}else {		//user2
 		nbyte_recvd = recv(sockfd, recv_buf, BUFSIZE, 0);
