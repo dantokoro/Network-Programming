@@ -11,8 +11,14 @@
 #include "user.h"
 #define PORT 4950
 #define BUFSIZE 1024
-char user_port[10][30]; //vd: user_port[5]="dang", user_port[4]="tu"
-char chatting[20]={};
+char user_port[20][30]; //vd: user_port[5]="dang", user_port[4]="tu"
+int chatting[20]={};   //vd: chatting[5]=4
+
+void set_chatting_default_value(){
+    for (int i = 0; i < 20; i++){
+      chatting[i] = -1;
+    }
+}
 
 void getKey(Node *cur, int i){
     int nbytes_recvd, j;
@@ -99,17 +105,6 @@ int HandlingLogIn(int newSocket, Node **head, char filename[]){
     return cur->login;  
 }
 
-// void send_to_all(int j, int i, int sockfd, int nbytes_recvd, char *recv_buf, fd_set *master)
-// {
-//     if (FD_ISSET(j, master)){
-//         if (j != sockfd && j != i) {
-//             if (send(j, recv_buf, nbytes_recvd, 0) == -1) {
-//                 perror("send");
-//             }
-//         }
-//     }
-// }
-
 void send_recv(int i, fd_set *master, int sockfd, int fdmax)
 {
     int nbytes_recvd, j;
@@ -127,10 +122,13 @@ void send_recv(int i, fd_set *master, int sockfd, int fdmax)
     }else {
         recv_buf[nbytes_recvd] = '\0';
         printf("Receive from user %d : %s\n", i, recv_buf);
-        // for(j = 0; j <= fdmax; j++){
-        //  send_to_all(j, i, sockfd, 100, recv_buf, master );
-        // }
         send(chatting[i], recv_buf, nbytes_recvd, 0);
+        if (strcmp(recv_buf, "end_chat")==0)
+        {
+            send(i, recv_buf, nbytes_recvd, 0);
+            chatting[chatting[i]]=-1;
+            chatting[i]=-1;
+        }
         bzero(recv_buf, sizeof(recv_buf));
     }
 }
@@ -264,6 +262,7 @@ int main()
     Node *head = NULL;
     char filename[30]="account.txt";
     docfile(filename, &head);
+    set_chatting_default_value(); //Set all chatting status =-1 (not inbox yet)
 
     fd_set master;
     fd_set read_fds;
@@ -300,7 +299,7 @@ int main()
                         active_user_list(head, i);
 
                     }else{
-                        if(chatting[i]==0)
+                        if(chatting[i]==-1)
                             handle_connect_to_friend(i, &master, sockfd, fdmax, head);
                         send_recv(i, &master, sockfd, fdmax);
                     }
