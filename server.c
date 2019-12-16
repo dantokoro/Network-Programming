@@ -105,7 +105,27 @@ int HandlingLogIn(int newSocket, Node **head, char filename[]){
     return cur->login;  
 }
 
-void send_recv(int i, fd_set *master, int sockfd, int fdmax)    //Handle send and receive message
+void active_user_list(Node *head, int i){       // send active user list to user
+    Node *cur;
+    int ret, j;
+    char confirm[100], chosen_user[30];
+    cur = head;
+    while(cur!=NULL){
+        if((cur->login) == 1){
+            send(i, cur->username, strlen(cur->username), 0);
+            strcpy(user_port[cur->i],cur->username);            
+            ret = recv(i, confirm, 1024, 0);
+            confirm[ret]='\0';
+            //printf("%s\n",confirm );
+        }
+        cur = cur->next;
+    }
+    send(i, "|done|", strlen("|done|"), 0);
+    ret = recv(i, confirm, 1024, 0);
+    confirm[ret]='\0';
+}
+
+void send_recv(int i, fd_set *master, Node* head)    //Handle send and receive message
 {
     int nbytes_recvd, j;
     char recv_buf[BUFSIZE], buf[BUFSIZE];
@@ -126,6 +146,9 @@ void send_recv(int i, fd_set *master, int sockfd, int fdmax)    //Handle send an
         if (strcmp(recv_buf, "end_chat")==0)
         {
             send(i, recv_buf, nbytes_recvd, 0);
+            recv(i, recv_buf, BUFSIZE, 0);
+            active_user_list(head, i);
+            active_user_list(head, chatting[i]);
             chatting[chatting[i]]=-1;
             chatting[i]=-1;
         }
@@ -151,48 +174,34 @@ void handle_connect_to_friend(int i, fd_set *master, int sockfd, int fdmax, Node
     }else {
         recv_buf[nbytes_recvd] = '\0';
         printf("Receive from user %d : %s\n", i, recv_buf);
-        cur1=SearchName(head, user_port[i]);
-        if(cur1==NULL){
-            printf("Khong tim thay thong tin user1\n");
-            exit(0);
-        }
-        cur2=SearchName(head, recv_buf);        //send notification to user2
-        if(cur2==NULL) printf("Khong tim thay thong tin user2\n");
-        else{
-            j=cur2->i;          //j=chosen user's port
-            sprintf(send_mess, "%s-%s-%s", cur1->n, cur1->e, cur1->username);
-            if (send(j, send_mess, strlen(send_mess), 0) == -1) {
+        if(strcmp(recv_buf, "update_list")==0){
+            active_user_list(head, i);
+            send(i, "OK", strlen("OK"), 0);
+            handle_connect_to_friend(i, master, sockfd, fdmax, head);
+        }else{
+            cur1=SearchName(head, user_port[i]);
+            if(cur1==NULL){
+                printf("Khong tim thay thong tin user1\n");
+                exit(0);
+            }
+            cur2=SearchName(head, recv_buf);        //send notification to user2
+            if(cur2==NULL) printf("Khong tim thay thong tin user2\n");
+            else{
+                j=cur2->i;          //j=chosen user's port
+                sprintf(send_mess, "%s-%s-%s", cur1->n, cur1->e, cur1->username);
+                if (send(j, send_mess, strlen(send_mess), 0) == -1) {
+                    perror("send");
+                }
+            }
+            sprintf(send_mess, "%s-%s-%s", cur2->n, cur2->e, cur2->username);   //send notification to user1
+            if (send(i, send_mess, strlen(send_mess), 0) == -1) {
                 perror("send");
             }
+            chatting[i]=j;
+            chatting[j]=i;
+            bzero(recv_buf, sizeof(recv_buf));
         }
-        sprintf(send_mess, "%s-%s-%s", cur2->n, cur2->e, cur2->username);   //send notification to user1
-        if (send(i, send_mess, strlen(send_mess), 0) == -1) {
-            perror("send");
-        }
-        chatting[i]=j;
-        chatting[j]=i;
-        bzero(recv_buf, sizeof(recv_buf));
     }
-}
-
-void active_user_list(Node *head, int i){       // send active user list to user
-    Node *cur;
-    int ret, j;
-    char confirm[100], chosen_user[30];
-    cur = head;
-    while(cur!=NULL){
-        if((cur->login) == 1){
-            send(i, cur->username, strlen(cur->username), 0);
-            strcpy(user_port[cur->i],cur->username);            
-            ret = recv(i, confirm, 1024, 0);
-            confirm[ret]='\0';
-            //printf("%s\n",confirm );
-        }
-        cur = cur->next;
-    }
-    send(i, "|done|", strlen("|done|"), 0);
-    ret = recv(i, confirm, 1024, 0);
-    confirm[ret]='\0';
 }
 
 void connection_accept(fd_set *master, int *fdmax, int sockfd, struct sockaddr_in *client_addr)
@@ -285,17 +294,14 @@ int main()
                             printf("------------LOGIN-------------\n");
                             login[i] = HandlingLogIn(i, &head, filename);
                             print_list(head);
-                            //deleteList(&head);
                         }
                         active_user_list(head, i);
 
                     }else{
-                        printf("chatting: %d\n",chatting[i] );
                         if(chatting[i]==-1){
-                            //active_user_list(head, i);
                             handle_connect_to_friend(i, &master, sockfd, fdmax, head);
                         }
-                        send_recv(i, &master, sockfd, fdmax);
+                        send_recv(i, &master, head);
                     }
                 }
             }
