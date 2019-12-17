@@ -12,7 +12,7 @@
 #define PORT 4950
 #define BUFSIZE 1024
 char user_port[20][30]; //ex: user_port[5]="dang", user_port[4]="tu"
-int chatting[20]={};   //ex: chatting[5]=4
+int chatting[20]={}, login[20]={};   //ex: chatting[5]=4
 
 void set_chatting_default_value(){  //Set all chatting status = -1
     for (int i = 0; i < 20; i++){
@@ -180,14 +180,18 @@ void handle_connect_to_friend(int i, fd_set *master, int sockfd, int fdmax, Node
             handle_connect_to_friend(i, master, sockfd, fdmax, head);
         }else{
             cur1=SearchName(head, user_port[i]);
-            if(cur1==NULL){
-                printf("Khong tim thay thong tin user1\n");
-                exit(0);
-            }
             cur2=SearchName(head, recv_buf);        //send notification to user2
             if(cur2==NULL){
                 printf("Khong tim thay thong tin user2\n");
                 send(i, "No_user_found", strlen("No_user_found"), 0);
+                handle_connect_to_friend(i, master, sockfd, fdmax, head);
+            }else if(cur2->login==0){
+                printf("user2 chua login\n");
+                send(i, "Not_online", strlen("Not_online"), 0);
+                handle_connect_to_friend(i, master, sockfd, fdmax, head);
+            }else if(chatting[cur2->i]!=-1){
+                printf("user2 dang trong phong chat khac\n");
+                send(i, "In_other_box", strlen("In_other_box"), 0);
                 handle_connect_to_friend(i, master, sockfd, fdmax, head);
             }else{
                 j=cur2->i;          //j=chosen user's port
@@ -262,7 +266,7 @@ void connect_request(int *sockfd, struct sockaddr_in *my_addr)
 int main()
 {
     char name[30];
-    int ret, login[20]={};
+    int ret;
     Node *head = NULL;
     char filename[30]="account.txt";
     docfile(filename, &head);
