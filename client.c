@@ -66,19 +66,19 @@ void get_active_user_list(int sockfd){
 	int nbyte_recvd, count=1;
 	char friend_name[100];
 	char recv_buf[BUFSIZE];
-	printf("-------LIST OF ACTIVE USER---------\n");
+	printf("\t----ACTIVE USERS----\n");
 	do{
 		bzero(recv_buf, sizeof(recv_buf));
 		nbyte_recvd = recv(sockfd, recv_buf, BUFSIZE, 0);
 		recv_buf[nbyte_recvd] = '\0';
 		send(sockfd, "OK", strlen("OK"), 0);
 		if(strcmp(recv_buf, "|done|")!=0){
-			printf("\t%s\n", recv_buf );
+			printf("\t|\t%s\t   |\n", recv_buf );
 			count++;
 		}
 	}while(strcmp(recv_buf, "|done|")!=0);
 	bzero(recv_buf, sizeof(recv_buf));
-	printf("------------------------------------\n");
+	printf("\t--------------------\n");
 	printf("Input name of user who you want to chat with (input update_list to renew list)\n");
 	
 }
@@ -90,10 +90,10 @@ void send_recv(int i, int sockfd)		//send and recv mess
   	char cryp_mess[BUFSIZE];
 	char recv_buf[BUFSIZE];
 	int nbyte_recvd;
-	const char delim[2]="-";
+	const char delim[2]="^";
 	char* sender_name;
 	char* recv_message;
-
+	
 	if (i == 0){
 		fgets(mess, BUFSIZE, stdin);
 		if (strcmp(mess , "\n") == 0) {
@@ -104,7 +104,7 @@ void send_recv(int i, int sockfd)		//send and recv mess
 			send(sockfd, mess, strlen(text_send), 0);
 		}else{
 		    strcpy(cryp_mess, crypPlainText(mess, e_friend_double, n_friend_double, 0));
-		    sprintf(text_send,"%s-%s", name, cryp_mess);
+		    sprintf(text_send,"%s^%s", name, cryp_mess);
 			send(sockfd, text_send, strlen(text_send), 0);
 		}
 	}else {
@@ -120,7 +120,11 @@ void send_recv(int i, int sockfd)		//send and recv mess
 			sender_name = strtok(recv_buf, delim);
 	    	recv_message = strtok(NULL, delim);
 	    	strcpy(cryp_recv_mess, crypPlainText(recv_message, d, n, 1));
-			printf("From %s: %s\n" , sender_name, cryp_recv_mess);
+			printf("%70s |", cryp_recv_mess);
+			printf("\033[1;32m");
+			printf("%s" , sender_name);
+			printf("\033[0m");
+			printf("|\n");
 			fflush(stdout);
 		}
 	}
@@ -199,6 +203,7 @@ void connect_to_friend(int i, int sockfd){
 			    n_friend_double=strtod(n_friend, &ptr);
 			    e_friend_double=strtod(e_friend, &ptr);
 			    printf("You are inbox with %s :D (input 'end_chat' to end chat) \n",friend_name);
+			    printf("\t\t-------------------CHAT WITH %s-------------------\n", friend_name);
 			}
 			
 	    }
@@ -211,6 +216,7 @@ void connect_to_friend(int i, int sockfd){
 	    n_friend_double=strtod(n_friend, &ptr);
 	    e_friend_double=strtod(e_friend, &ptr);
 	    printf("You are inbox with %s :D (input 'end_chat' to end chat) \n",friend_name);
+		printf("\t\t-----------------CHAT WITH %s-----------------\n", friend_name);
 		fflush(stdout);
 	}
 }
@@ -233,7 +239,7 @@ int main()
 	while(login==0)
 		LogIn(sockfd);
 	createKey(&n, &e, &p, &q, &d, &fi, sockfd);
-	//printf("e=%f n=%f d=%f\n",e, n, d );
+//	printf("e=%f n=%f d=%f\n",e, n, d );
 	get_active_user_list(sockfd);
 	while(1){
 		read_fds = master;
@@ -241,7 +247,6 @@ int main()
 			perror("select");
 			exit(4);
 		}
-
 		for(i=0; i <= fdmax; i++ )
 			if(FD_ISSET(i, &read_fds)){
 				if(chatting==0){
