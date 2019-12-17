@@ -21,7 +21,7 @@ void LogIn(int clientSocket){		//function log in with a username and password
 	char password[1024], buffer[1024];
 	int wrong_pass_count=0;
 	char *temp_ptr;
-	printf("Username: \n");
+	printf("Username: ");
 	fgets(name, 100, stdin);
 	name[strlen(name) - 1] = '\0';
 	if(name[0]=='\0') exit(0);
@@ -33,7 +33,7 @@ void LogIn(int clientSocket){		//function log in with a username and password
 		printf("%s\n", buffer);
 	}else if(strcmp(buffer, "Account is active")==0){
 		do{
-			printf("Password: \n");					
+			printf("Password: ");					
 			scanf("%s%*c", password);
 			send(clientSocket, password, strlen(password), 0);
 			bzero(password, sizeof(password));
@@ -184,7 +184,13 @@ void connect_to_friend(int i, int sockfd){
 			nbyte_recvd = recv(sockfd, recv_buf, BUFSIZE, 0);
 			recv_buf[nbyte_recvd] = '\0';
 			if(strcmp(recv_buf, "No_user_found")==0){
-				printf("User not exist. Input again.\n");
+				printf("User not exist :( Input again.\n");
+				connect_to_friend(i,sockfd);
+			}else if(strcmp(recv_buf, "Not_online")==0){
+				printf("%s is not online :( Choose another user\n", mess);
+				connect_to_friend(i,sockfd);
+			}else if(strcmp(recv_buf, "In_other_box")==0){
+				printf("%s is busy :( Choose another user\n", mess);
 				connect_to_friend(i,sockfd);
 			}else{
 				n_friend = strtok(recv_buf, delim);
