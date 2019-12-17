@@ -44,7 +44,6 @@ char ascci[] = {
 '#',
 '$',
 '%',
-'^',
 '&',
 '*',
 '(',
@@ -176,7 +175,9 @@ void getInput(double n, double e, double* p, double* q, double* fi, double* d) {
   if(*p != 1) {
     // Get fi(n)
     *fi = (*p - 1) * (*q -1);
+    printf("11111\n");
     euclid(*fi, e, d);
+    printf("22222\n");
     if(*d == 1) {
       printf("[!]Can't find d\n");
     }
