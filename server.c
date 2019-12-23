@@ -154,12 +154,15 @@ void send_recv(int i, fd_set *master, Node *head) //Handle send and receive mess
     int nbytes_recvd, j;
     char recv_buf[BUFSIZE], buf[BUFSIZE];
     char send_mess[BUFSIZE];
+    Node *cur;
 
     if ((nbytes_recvd = recv(i, recv_buf, BUFSIZE, 0)) <= 0)
     {
         if (nbytes_recvd == 0)
         {
             printf("socket %d hung up\n", i);
+            cur=SearchName(head, user_port[i]);
+            cur->login=0;
         }
         else
         {
@@ -198,6 +201,8 @@ void handle_connect_to_friend(int i, fd_set *master, int sockfd, int fdmax, Node
         if (nbytes_recvd == 0)
         {
             printf("socket %d hung up\n", i);
+            cur1=SearchName(head, user_port[i]);
+            cur1->login=0;
         }
         else
         {
@@ -214,7 +219,6 @@ void handle_connect_to_friend(int i, fd_set *master, int sockfd, int fdmax, Node
         {
             active_user_list(head, i);
             send(i, "OK", strlen("OK"), 0);
-            handle_connect_to_friend(i, master, sockfd, fdmax, head);
         }
         else
         {
@@ -224,19 +228,16 @@ void handle_connect_to_friend(int i, fd_set *master, int sockfd, int fdmax, Node
             {
                 printf("Khong tim thay thong tin user2\n");
                 send(i, "No_user_found", strlen("No_user_found"), 0);
-                handle_connect_to_friend(i, master, sockfd, fdmax, head);
             }
             else if (cur2->login == 0)
             {
                 printf("user2 chua login\n");
                 send(i, "Not_online", strlen("Not_online"), 0);
-                handle_connect_to_friend(i, master, sockfd, fdmax, head);
             }
             else if (chatting[cur2->i] != -1)
             {
                 printf("user2 dang trong phong chat khac\n");
                 send(i, "In_other_box", strlen("In_other_box"), 0);
-                handle_connect_to_friend(i, master, sockfd, fdmax, head);
             }
             else
             {
@@ -373,7 +374,8 @@ int main()
                         {
                             handle_connect_to_friend(i, &master, sockfd, fdmax, head);
                         }
-                        send_recv(i, &master, head);
+                        else
+                            send_recv(i, &master, head);
                     }
                 }
             }

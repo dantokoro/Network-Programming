@@ -210,19 +210,25 @@ void connect_to_friend(int i, int sockfd)
 
 	if (i == 0)
 	{ //user1
-		fgets(mess, BUFSIZE, stdin);
-		if (strcmp(mess, "\n") == 0)
-		{
-			exit(0);
-		}
-		mess[strlen(mess) - 1] = '\0';
+		do{
+			fgets(mess, BUFSIZE, stdin);
+			if (strcmp(mess, "\n") == 0)
+			{
+				exit(0);
+			}
+			mess[strlen(mess) - 1] = '\0';
+			if(strcmp(mess, name)==0)
+				printf("Can't chat with yourself. Input again.\n");
+			else
+				break;
+		}while(1);
+		
 		send(sockfd, mess, strlen(mess), 0);
 		if (strcmp(mess, "update_list") == 0)
 		{
 			get_active_user_list(sockfd);
 			nbyte_recvd = recv(sockfd, recv_buf, BUFSIZE, 0);
 			recv_buf[nbyte_recvd] = '\0';
-			connect_to_friend(i, sockfd);
 		}
 		else
 		{
@@ -231,20 +237,18 @@ void connect_to_friend(int i, int sockfd)
 			if (strcmp(recv_buf, "No_user_found") == 0)
 			{
 				printf("User not exist :( Input again.\n");
-				connect_to_friend(i, sockfd);
 			}
 			else if (strcmp(recv_buf, "Not_online") == 0)
 			{
 				printf("%s is not online :( Choose another user\n", mess);
-				connect_to_friend(i, sockfd);
 			}
 			else if (strcmp(recv_buf, "In_other_box") == 0)
 			{
 				printf("%s is busy :( Choose another user\n", mess);
-				connect_to_friend(i, sockfd);
 			}
 			else
-			{
+			{	
+				chatting = 1;
 				n_friend = strtok(recv_buf, delim);
 				e_friend = strtok(NULL, delim);
 				friend_name = strtok(NULL, delim);
@@ -257,6 +261,7 @@ void connect_to_friend(int i, int sockfd)
 	}
 	else
 	{ //user2
+		chatting =1;
 		nbyte_recvd = recv(sockfd, recv_buf, BUFSIZE, 0);
 		recv_buf[nbyte_recvd] = '\0';
 		n_friend = strtok(recv_buf, delim);
@@ -303,9 +308,8 @@ int main()
 				if (chatting == 0)
 				{
 					connect_to_friend(i, sockfd);
-					chatting = 1;
-				}
-				send_recv(i, sockfd);
+				}else
+					send_recv(i, sockfd);
 			}
 	}
 	printf("client-quited\n");
