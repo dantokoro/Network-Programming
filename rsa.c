@@ -86,8 +86,8 @@ void get_n(double *n, double *e, double* p, double* q){
   srand((unsigned) time(&t));
   i=rand()%prime_n_len;
   *p=prime_n[i];
-  if(i==19){
-    *q=prime_n[i-1];
+  if(i==(prime_n_len-1)){
+    *q=prime_n[i-1]; 
   }else{
     *q=prime_n[i+1];
   } 
@@ -129,18 +129,6 @@ int isPrimeNumber(double num) {
 void analysisToTwoPrime(double num, double *num1, double *num2) {
   *num1 = 1;
   *num2 = num;
-
-  // for(int i = 2; i <= sqrt(num); i++) {
-  //   if(isPrimeNumber(i)) {
-  //     if(fmodl(num, i) == 0) {
-  //       if(isPrimeNumber(num / i)) {
-  //         *num1 = i;
-  //         *num2 = num / i;
-  //         return;
-  //       }
-  //     }
-  //   }
-  // }
   for(double i = floor(sqrt(num)); i >= 2; i--) {
     if(isPrimeNumber(i)) {
       if(fmodl(num, i) == 0) {
@@ -175,9 +163,7 @@ void getInput(double n, double e, double* p, double* q, double* fi, double* d) {
   if(*p != 1) {
     // Get fi(n)
     *fi = (*p - 1) * (*q -1);
-    printf("11111\n");
     euclid(*fi, e, d);
-    printf("22222\n");
     if(*d == 1) {
       printf("[!]Can't find d\n");
     }
