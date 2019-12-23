@@ -46,6 +46,10 @@ void getKey(Node *cur, int i)
     {
         recv_buf[nbytes_recvd] = '\0';
         printf("Receive from user %d : %s\n", i, recv_buf);
+        if(strcmp(recv_buf, "OK")==0){
+                       return;
+
+        }
         n = strtok(recv_buf, delim);
         e = strtok(NULL, delim);
         printf("%s %s\n", n, e);
@@ -175,6 +179,10 @@ void send_recv(int i, fd_set *master, Node *head) //Handle send and receive mess
     {
         recv_buf[nbytes_recvd] = '\0';
         printf("Receive from user %d : %s\n", i, recv_buf);
+        if(strcmp(recv_buf, "OK")==0){
+                       return;
+
+        }
         send(chatting[i], recv_buf, nbytes_recvd, 0);
         if (strcmp(recv_buf, "end_chat") == 0)
         {
@@ -215,6 +223,9 @@ void handle_connect_to_friend(int i, fd_set *master, int sockfd, int fdmax, Node
     {
         recv_buf[nbytes_recvd] = '\0';
         printf("Receive from user %d : %s\n", i, recv_buf);
+        if(strcmp(recv_buf, "OK")==0){
+           return;
+        }
         if (strcmp(recv_buf, "update_list") == 0)
         {
             active_user_list(head, i);
