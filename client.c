@@ -142,7 +142,6 @@ void send_recv(int i, int sockfd) //send and recv mess
 		if (strcmp(recv_buf, "end_chat") == 0)
 		{
 			printf("-------End chat-------\n");
-			//printf("Input name of user who you want to chat with\n");
 			send(sockfd, "Send_user2_name", strlen("Send_user2_name"), 0);
 			get_active_user_list(sockfd);
 			chatting = 0;
@@ -183,10 +182,6 @@ void connect_request(int *sockfd, struct sockaddr_in *server_addr)
 		perror("connect");
 		exit(1);
 	}
-	// int nbyte_recvd = recv(*sockfd, my_port, 20, 0);
-	// my_port[nbyte_recvd] = '\0';
-	//printf("-----------My ID: %d----------\n",fd );
-	// bzero(my_port, sizeof(my_port));
 }
 void createKey(double *n, double *e, double *p, double *q, double *d, double *fi, int sockfd)
 { //Generate public key and calculate primary key
@@ -195,7 +190,6 @@ void createKey(double *n, double *e, double *p, double *q, double *d, double *fi
 	get_e(e);
 	getInput(*n, *e, p, q, fi, d);
 	sprintf(publicKey, "%f-%f", *n, *e);
-	//printf("%s\n", publicKey);
 	send(sockfd, publicKey, strlen(publicKey), 0);
 	bzero(publicKey, sizeof(publicKey));
 }
@@ -292,7 +286,6 @@ int main()
 	while (login == 0)
 		LogIn(sockfd);
 	createKey(&n, &e, &p, &q, &d, &fi, sockfd);
-	//	printf("e=%f n=%f d=%f\n",e, n, d );
 	get_active_user_list(sockfd);
 	while (1)
 	{

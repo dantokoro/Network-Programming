@@ -40,7 +40,6 @@ void getKey(Node *cur, int i)
             perror("recv");
         }
         close(i);
-        //FD_CLR(i, master);
     }
     else
     {
@@ -69,7 +68,6 @@ int HandlingLogIn(int newSocket, Node **head, char filename[])
     bzero(name, sizeof(name));
     ret = recv(newSocket, name, 1024, 0);
     name[ret] = '\0';
-    //printf("Username: %s\n", name);
     Node *cur;
     cur = SearchName((*head), name);
     if (cur != NULL)
@@ -90,7 +88,6 @@ int HandlingLogIn(int newSocket, Node **head, char filename[])
             {
                 ret = recv(newSocket, password, 1024, 0);
                 password[ret] = '\0';
-                //printf("Password: %s\n", password);
                 if (strcmp(cur->password, password) != 0)
                 {
                     wrong_pass_count++;
@@ -144,7 +141,6 @@ void active_user_list(Node *head, int i)
             strcpy(user_port[cur->i], cur->username);
             ret = recv(i, confirm, 1024, 0);
             confirm[ret] = '\0';
-            //printf("%s\n",confirm );
         }
         cur = cur->next;
     }
@@ -289,10 +285,6 @@ void connection_accept(fd_set *master, int *fdmax, int sockfd, struct sockaddr_i
         if (newsockfd > *fdmax)
             *fdmax = newsockfd;
         printf("new connection from %s on port %d \n", inet_ntoa(client_addr->sin_addr), ntohs(client_addr->sin_port));
-        // sprintf(client_port, "%d", ntohs(client_addr->sin_port));
-        // if (send(newsockfd, client_port, strlen(client_port), 0) == -1) {
-        //  perror("send");
-        // }
     }
 }
 
