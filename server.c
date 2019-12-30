@@ -51,7 +51,6 @@ void getKey(Node *cur, int i)
         }
         n = strtok(recv_buf, delim);
         e = strtok(NULL, delim);
-        printf("%s %s\n", n, e);
         cur->i = i;
         strcpy(cur->n, n);
         strcpy(cur->e, e);
